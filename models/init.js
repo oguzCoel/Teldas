@@ -91,10 +91,19 @@ var init1 = new init({
 
 });
 
-console.log(init1.street_nr);
 
 init1.save(function (err) {
     if(err) return console.error(err);
 
 });
+
+if(!initSchema.options.toObject) { initSchema.options.toObject = {}; }
+initSchema.options.toObject.transform = function (doc, ret) {
+    delete ret._id;
+    return ret;
+};
+
+var json = init1.toObject();
+
+console.log(json);
 
