@@ -2,6 +2,7 @@
  * Created by fanatik on 4/25/17.
  */
 
+var fs = require('fs');
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/teldas');
 
@@ -103,7 +104,63 @@ initSchema.options.toObject.transform = function (doc, ret) {
     return ret;
 };
 
-var json = init1.toObject();
+var initObject = init1.toObject();
 
-console.log(json);
+
+var headerSchema = mongoose.Schema({
+    title: String,
+    tsp_id: String,
+    filename: String,
+    records: String
+});
+
+var header = mongoose.model('header', headerSchema);
+
+var header1 = new header({
+    "title": "HEADER",
+    "tsp_id": "98078",
+    "filename": "98078_000_20170410000001.upl",
+    "records": "1"
+});
+
+header1.save(function (err) {
+    if(err) return console.error(err);
+});
+
+if(!headerSchema.options.toObject) headerSchema.options.toObject = {};
+headerSchema.options.toObject.transform = function (doc, ret) {
+    delete ret._id;
+    return ret;
+};
+
+var headerObject = header1.toObject();
+
+var headerArray = [];
+var initArray = [];
+
+for(var i in headerObject){
+    headerArray.push(headerObject[i]);
+};
+
+for(var i in initObject){
+    initArray.push(initObject[i]);
+};
+
+var string = "";
+
+for(var i = 0; i < headerArray.length; i++){
+    string += (headerArray[i] + '\t');
+};
+
+string += '\n';
+
+for(var i = 0; i < initArray.length; i++){
+    string += (initArray[i] + '\t');
+};
+
+var queuePath = "../queue/" + header1.filename;
+fs.writeFileSync(queuePath, string);
+
+
+
 
